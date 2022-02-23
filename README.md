@@ -4,4 +4,4 @@ Pathfinding algorithm visualizer built in C++ using Raylib library
 
 Screenshot:
 
-![results](output.png)
+![results](https://github.com/WFERRIE/PathfindingAlgorithmVisualizer/blob/main/output.PNG)

@@ -13,21 +13,11 @@ using namespace std;
 // cd build
 // mingw32-make
 
-// draw shortest path
-// add animations (probably needs multithreading or some other workaround)
-// add other algos (DFS, Dijkstra, Bidirection dijkstra, A*)
-// add an algorithm selection option
-// add an output for path cost and time to solve
-// add a "retry with same path" and "retry with new path" and "exit" buttons
-// add a "show animation" button?
-// clean up main.cpp
-
 enum gameStates
 {
     selectingStart,
     selectingEnd,
     selectingLocked,
-    selectingAlgo,
     running,
     display
 };
@@ -48,20 +38,18 @@ main(void)
 
     InitWindow(screenWidth, screenHeight, "Pathfinding Algorithm Visualizer");
 
-    // const int GRIDSIZE = 4;
-    // const int RECSIZE = 75;
-    // const int RECSPACING = 80;
-    // const int GRIDMARGIN = 10;
-
     const int GRIDSIZE = 25;
     const int RECSIZE = 15;
     const int RECSPACING = 17;
     const int GRIDMARGIN = 10;
+    const int numNodes = GRIDSIZE * GRIDSIZE;
 
     int startID = 0;
-    int endID = (GRIDSIZE * GRIDSIZE) - 1;
+    int endID = (numNodes)-1;
 
-    Node nodes[GRIDSIZE * GRIDSIZE];
+    Node nodes[numNodes];
+
+    vector<int> adj[numNodes];
 
     for (int i = 0; i < GRIDSIZE + 1; i++)
     {
@@ -79,7 +67,7 @@ main(void)
     {
         // Update
         //----------------------------------------------------------------------------------
-        // TODO: Update your variables here
+        // TODO: Update variables here
         //----------------------------------------------------------------------------------
 
         for (int i = 0; i < GRIDSIZE; i++)
@@ -151,15 +139,6 @@ main(void)
             DrawText("Set Locked Nodes", 450, 100, 20, BLACK);
             if (okButton.isLeftClicked())
             {
-                gameState = selectingAlgo;
-            }
-            break;
-        }
-        case selectingAlgo:
-        {
-            DrawText("Select Algorithm", 450, 100, 20, BLACK);
-            if (okButton.isLeftClicked())
-            {
                 gameState = running;
             }
             break;
@@ -167,9 +146,8 @@ main(void)
         case running:
         {
             DrawText("Running...", 450, 100, 20, BLACK);
-            // do BFS
 
-            Graph g(GRIDSIZE * GRIDSIZE);
+            Graph g(numNodes);
 
             int u;
             int v;
@@ -180,40 +158,39 @@ main(void)
                 {
                     if (nodes[j + i * GRIDSIZE].getState() != Node::Locked)
                     {
-                        std::cout << "yo" << std::endl;
                         if (i > 0 && (nodes[j + (i - 1) * GRIDSIZE].getState() != Node::Locked))
                         {
                             // add up
                             u = (GRIDSIZE * i) + j;
                             v = (GRIDSIZE * (i - 1)) + j;
-                            g.addEdge(u, v);
+                            g.addEdge(adj, u, v);
                         }
                         if (i < (GRIDSIZE - 1) && (nodes[j + (i + 1) * GRIDSIZE].getState() != Node::Locked))
                         {
                             // add down
                             u = (GRIDSIZE * i) + j;
                             v = (GRIDSIZE * (i + 1)) + j;
-                            g.addEdge(u, v);
+                            g.addEdge(adj, u, v);
                         }
                         if (j < (GRIDSIZE - 1) && (nodes[(j + 1) + i * GRIDSIZE].getState() != Node::Locked))
                         {
                             // add right
                             u = (GRIDSIZE * i) + j;
                             v = (GRIDSIZE * i) + (j + 1);
-                            g.addEdge(u, v);
+                            g.addEdge(adj, u, v);
                         }
                         if (j > 0 && (nodes[(j - 1) + i * GRIDSIZE].getState() != Node::Locked))
                         {
                             // add left
                             u = (GRIDSIZE * i) + j;
                             v = (GRIDSIZE * i) + (j - 1);
-                            g.addEdge(u, v);
+                            g.addEdge(adj, u, v);
                         }
                     }
                 }
             }
 
-            g.BFS(startID, endID, nodes, GRIDSIZE);
+            g.BFS(adj, startID, endID, nodes);
             gameState = display;
             break;
         }
@@ -222,6 +199,7 @@ main(void)
         DrawText("Locked", 450, 250, 20, LIGHTGRAY);
         DrawText("Start", 450, 300, 20, PINK);
         DrawText("End", 450, 350, 20, PURPLE);
+        DrawText("Shortest Path", 450, 400, 20, RED);
 
         for (int i = 0; i < GRIDSIZE; i++)
         {

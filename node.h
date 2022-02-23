@@ -19,7 +19,8 @@ public:
         Start,
         End,
         Queued,
-        Processed
+        Processed,
+        ShortestPath
     };
 
     States _state = Base;
@@ -55,6 +56,9 @@ public:
             break;
         case Processed:
             DrawRectangle(posX, posY, width, height, ORANGE);
+            break;
+        case ShortestPath:
+            DrawRectangle(posX, posY, width, height, RED);
             break;
         }
     }
